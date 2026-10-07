@@ -5,6 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
+  # ── Job 1: Continuous Integration ──────────────────────────────────────────
+  # Builds the Docker image and pushes it to Docker Hub on every push to main.
   build-and-push:
     runs-on: ubuntu-latest
     steps:
@@ -29,9 +31,17 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/cicd-k8s-demo:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/cicd-k8s-demo:${{ github.sha }}
 
+  # ── Job 2: Continuous Deployment ───────────────────────────────────────────
+  # Deploys to the Kubernetes cluster. Requires KUBE_CONFIG_DATA secret.
+  # NOTE: GitHub-hosted runners cannot reach a local Docker Desktop cluster
+  # directly. This job will succeed only when a valid, network-accessible
+  # kubeconfig is stored in KUBE_CONFIG_DATA. For a local cluster, run the
+  # kubectl commands manually (see README) or use a self-hosted runner.
   deploy-to-kubernetes:
     needs: build-and-push
     runs-on: ubuntu-latest
+    # Skip this job gracefully if the kubeconfig secret is not yet configured.
+    if: ${{ secrets.KUBE_CONFIG_DATA != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
