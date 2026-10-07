@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>To-Do List</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #1f4e79 0%, #2e74b5 50%, #4fc3f7 100%);
+    }
+    .card {
+      background: #fff; border-radius: 16px; padding: 40px;
+      width: 90%; max-width: 480px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+    }
+    h1 { color: #1f2937; margin-bottom: 4px; }
+    p.sub { color: #6b7280; margin-bottom: 22px; font-size: 13px; }
+    .add-form { display: flex; gap: 8px; margin-bottom: 22px; }
+    input[type=text] {
+      flex: 1; padding: 10px 12px; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 14px;
+    }
+    button {
+      padding: 10px 16px; border: none; border-radius: 8px;
+      background: #2e74b5; color: #fff; font-weight: 600; cursor: pointer;
+    }
+    ul { list-style: none; }
+    li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid #f3f4f6;
+    }
+    li span { flex: 1; font-size: 15px; color: #1f2937; }
+    li span.done { text-decoration: line-through; color: #9ca3af; }
+    .del-btn { background: #e74c3c; padding: 6px 10px; }
+    .empty { color: #9ca3af; font-size: 14px; text-align: center; padding: 12px 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>&#128221; My To-Do List</h1>
+    <p class="sub">{{ pending }} task(s) pending &middot; running on Kubernetes</p>
+
+    <form class="add-form" action="/add" method="post">
+      <input type="text" name="title" placeholder="Add a new task..." required />
+      <button type="submit">Add</button>
+    </form>
+
+    <ul>
+      {% for task in tasks %}
+      <li>
+        <form action="/toggle/{{ task['id'] }}" method="post">
+          <input type="checkbox" onchange="this.form.submit()" {% if task['done'] %}checked{% endif %} />
+        </form>
+        <span class="{{ 'done' if task['done'] else '' }}">{{ task['title'] }}</span>
+        <form action="/delete/{{ task['id'] }}" method="post">
+          <button class="del-btn" type="submit">&#10005;</button>
+        </form>
+      </li>
+      {% else %}
+      <li class="empty">No tasks yet — add your first one above.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</body>
+</html>
